@@ -1,0 +1,183 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>wifi car</title>
+<style type="text/css">
+div#container{width:800px}
+div#cam{width:640px; height:480px; float:left;
+transform:rotate(90deg);
+-ms-transform:rotate(90deg); /* IE 9 */
+-moz-transform:rotate(90deg); /* Firefox */
+-webkit-transform:rotate(90deg); /* Safari and Chrome */
+-o-transform:rotate(90deg); /* Opera */
+position: relative;top: 80px
+
+}
+div#buttons{width:150px; height:500px; float:left;}
+input#forward{width: 80px; height: 80px; position: fixed; left: 670px;top: 20px}
+input#left{width: 80px; height: 80px; position: fixed; left: 630px;top: 100px}
+input#right{width: 80px; height: 80px; position: fixed; left: 710px;top: 180px}
+input#back{width: 80px; height: 80px; position: fixed; left: 670px;top: 260px}
+input#up{width: 80px; height: 80px; position: fixed; left: 670px;top: 340px}
+input#down{width: 80px; height: 80px; position: fixed; left: 670px;top: 420px}
+input#stop{width: 80px; height: 80px; position: fixed; left: 670px;top: 500px}
+</style>
+
+<script src="gamepadjs/gamepad_uncompressed.js"></script>
+<script>
+		var gamepadActive = false;
+		var gamepadActive = false;
+    ps2Buttons = new Array();
+ 
+		ps2Buttons[0]  = 'triangle',
+		ps2Buttons[3]  = 'square',
+		ps2Buttons[2]  = 'cross',
+		ps2Buttons[1]  = 'circle',
+		ps2Buttons[6]  = 'L1',
+		ps2Buttons[4]   = 'L2',
+		ps2Buttons[7]  = 'R1',
+		ps2Buttons[5]   = 'R2',
+		ps2Buttons[8]   = 'select',
+		ps2Buttons[9]   = 'start';
+		 
+		function gamepadConnected(evt)
+		{
+		  console.log(evt);
+		  gamepadActive = true;
+		}
+		function gamepadDisconnected(evt)
+		{
+		  console.log(evt);
+		  gamepadActive = false;
+		}
+		 
+		window.addEventListener('MozGamepadConnected', gamepadConnected);
+		window.addEventListener('MozGamepadDisconnected', gamepadDisconnected); 
+		
+
+		function buttonPressed(evt, pressed)
+		{
+		  //console.log(evt.button, pressed); 
+		  //console.log(evt.button + ps2Buttons[evt.button] + pressed);
+		  if(pressed){
+		  	if(ps2Buttons[evt.button] == 'triangle')
+		  		sendSer('U');
+		  	if(ps2Buttons[evt.button] == 'cross')
+		  		sendSer('D');		  	
+		  }
+		}
+		window.addEventListener("MozGamepadButtonDown", function(evt) { buttonPressed(evt, true); } );
+		window.addEventListener("MozGamepadButtonUp", function(evt) { buttonPressed(evt, false); } );
+		
+		
+
+		function getDirection(x,y){
+				var ret;
+				
+				/* center */
+				if((x < 0.5) && (x > -0.5) && (y < 0.5) && (y > -0.5)){
+					ret = 'C';
+				}
+				/* up or down*/
+				else if((x < 0.5) && (x > -0.5)){
+					if(y < -0.5)//up
+						ret = 'U';
+					else if(y > 0.5)//down
+						ret = 'D';
+
+				}
+				/* left or right*/
+				else if((y < 0.5) && (y > -0.5)){
+					if(x < -0.5)//left
+						ret = 'L';
+					else if(x > 0.5)//right
+						ret = 'R';
+				}	
+				
+
+				return ret;
+		}
+		function update(){
+		  /* only for PS2 controller */
+      var pads = Gamepad.getStates();
+      var pad = pads[0];//onlu one?
+      if(pad){
+      	//console.log(pad.leftStickX, pad.leftStickY);
+				var flag = getDirection(pad.leftStickX,pad.leftStickY);
+				switch(flag){
+					case 'U':
+						sendSer('F');
+						//timeout = setTimeout(update(),500);
+						break;
+					case 'D':
+						sendSer('B');
+						//timeout = setTimeout(update(),500);
+						break;
+					case 'L':
+						sendSer('L');
+						//timeout = setTimeout(update(),500);
+						break;
+					case 'R':
+						sendSer('R');
+						//timeout = setTimeout(update(),500);
+						break;
+					case 'C':
+						sendSer('S');
+						//clearTimeout(timeout);
+						break;
+					default:
+						//clearTimeout(timeout);
+						break;
+				}	
+				
+
+		    
+		}
+	}
+		function moveAnalogSticks(evt) {
+			
+		  //timeout = setTimeout(update(),500);
+		  update();
+
+
+
+      
+
+		}
+		
+		window.addEventListener("MozGamepadAxisMove", moveAnalogSticks); 
+		
+			
+	function sendSer(value){
+		console.log(value);
+	document.getElementById("ser").src="http://192.168.3.10/cgi-bin/web2ser?"+value;
+	}
+
+</script>
+</head>
+
+<body>
+	
+<div id="container">
+	<div id="cam">
+
+
+	  <img src="http://192.168.3.10:8080/?action=stream" name="I1" id="I1" style="width: 640px; height: 480px"/>
+
+	</div>
+	<div id="buttons">
+		<img id="ser" width="1" height="1" />
+		<input id="forward"type="button" ontouchstart="sendSer('F')" ontouchend="sendSer('S')" onmousedown="sendSer('F')" onmouseup="sendSer('S')" value="forward" align="left" />
+		<input id="left"type="button" ontouchstart="sendSer('L')" ontouchend="sendSer('S')" onmousedown="sendSer('L')" onmouseup="sendSer('S')" value="left" align="left" />
+		<input id="right"type="button" ontouchstart="sendSer('R')" ontouchend="sendSer('S')" onmousedown="sendSer('R')" onmouseup="sendSer('S')" value="right" align="left" />
+		<input id="back"type="button" ontouchstart="sendSer('B')" ontouchend="sendSer('S')" onmousedown="sendSer('B')" onmouseup="sendSer('S')" value="back"align="left" />
+		<input id="up"type="button" ontouchstart="sendSer('U')" onmousedown="sendSer('U')" value="up" align="left" />
+		<input id="down"type="button" ontouchstart="sendSer('D')" onmousedown="sendSer('D')" value="down" align="left" />
+		<input id="stop"type="button" ontouchstart="sendSer('S')" onmousedown="sendSer('S')" value="stop" align="left" />
+	</div>
+</div>
+</body>
+
+</html>

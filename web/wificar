@@ -1,0 +1,12 @@
+#!/bin/sh /etc/rc.common
+
+START=80
+
+start() {
+	/usr/bin/stty -F /dev/ttyATH0 raw speed 9600
+#	ser2net -c /etc/ser2net.conf
+}
+
+#stop(){
+#	killall mjpg_streamer
+#}
